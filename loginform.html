@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circuit Board Replies</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #0d1117;
+      color: #ddd;
+      padding: 40px;
+    }
+
+    body div{
+    position: relative;
+    background: pink;
+    height: 300px;
+    }
+    body div ul{
+      position: absolute;
+      background: blue;
+      left: 300px;
+      width: 150px;
+      border-left: 2px solid white;
+    }
+    body div ul::before{
+      content: "";
+      border-top: 1px solid #00ff88;
+      position: absolute;
+      top: 20px;
+      left: -300px;
+      width: 300px;
+      box-shadow: 0 0 6px #00ff88;
+    }
+  </style>
+</head>
+<body>
+<div>
+  <ul>
+    <li>Name: Agbesi Innocent Kwesi</li>
+  </ul>
+</div>
+
+</body>
+</html>

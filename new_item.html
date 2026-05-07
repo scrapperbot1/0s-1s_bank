@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="http://localhost/LandingPageRecs/mascomlogo.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<title>Create Item</title>
+<style>
+:root { 
+  --gold-color: #E6C200; 
+  --gold-glow: rgba(230, 194, 0, 0.6);
+  --accent:#FFD700;
+  --accent-dark:#B8860B;
+  --brand-black:#000000;
+  --brand-gold:#D4AF37;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  opacity: 0;
+  transition: opacity 0.75s ease-in-out;
+}
+
+body.loaded {
+  opacity: 1;
+}
+
+input:focus,
+textarea:focus{
+  outline: none;
+  border-color: #32CD32;
+  box-shadow: 0 0 4px rgba(50, 205, 50, 0.6);
+}
+body { background-color:#f3f4f6; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem; font-family:sans-serif; }
+.category-container { background:#fff; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1); border-radius:1rem; padding:1.5rem; width:100%; max-width:32rem; border:1.5px solid var(--gold-color); }
+.category-container h2 { font-size:1.25rem; font-weight:700; margin-bottom:1rem; color:#1f2937; }
+.modal-title { font-size:1.125rem; font-weight:600; margin-bottom:1rem; color:#1f2937; }
+.radio-group { display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem; }
+.radio-group label { display:flex; align-items:center; gap:0.5rem; }
+input[type="radio"] { accent-color:var(--brand-gold);}
+#createBtn { background:black; color:white; font-weight:600; border-radius:0.75rem; padding:0.75rem; width:100%; border:none; cursor:pointer; transition:color 0.3s, transform 0.2s; }
+#createBtn:hover { color:var(--gold-color); transform:scale(1.02); }
+#cancelBtn, #saveBtn { border-radius:0.75rem; padding:0.5rem 1rem; cursor:pointer; transition:all 0.2s; }
+#cancelBtn { background:#fca5a5; color:black; border:1.5px solid #f87171; }
+#cancelBtn:hover { background:#ef4444; color:white; }
+#saveBtn { background:var(--gold-color); color:black; border:1.5px solid var(--gold-color); }
+#saveBtn:hover { background:#CBA600; color:white; }
+#modal { display:none; position:fixed; inset:0; background-color:rgba(230,194,0,0.15); backdrop-filter:blur(2px); justify-content:center; align-items:center; z-index:999; }
+#modal.show { display:flex; }
+#modalContent { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1); padding:1.5rem; width:100%; max-width:28rem; max-height:90vh; overflow-y:auto; border:1.5px solid var(--gold-color); position:relative; }
+#modalContent.highlighted { box-shadow:0 0 20px var(--gold-glow); transition:box-shadow 0.3s; }
+label { display:block; margin-bottom:0.75rem; }
+input[type="number"], input[type="file"], textarea { display:block; width:100%; padding:0.5rem; border-radius:0.5rem; border:1.5px solid var(--gold-color); margin-top:0.25rem; box-sizing:border-box; }
+textarea { min-height:80px; resize:vertical; max-height: 200px;}
+small { color:#6b7280;}
+#imagePreview {display:flex;
+              justify-content: space-evenly;
+              align-items: flex-start;
+              flex-wrap: wrap;
+              gap:0.75rem; 
+              margin-bottom:1rem;}
+@media(min-width:640px){#imagePreview{grid-template-columns:repeat(3,1fr);} }
+.image-item { position:relative; background:#f9fafb; border:1.5px solid var(--gold-color); border-radius:0.5rem; padding:0.25rem; }
+.image-item img { width:100%; height:6rem; object-fit:cover; border-radius:0.5rem; display:block; }
+.image-item button { position:absolute; top:0.25rem; right:0.25rem; background:#dc2626; color:white; font-size:0.75rem; padding:0.25rem 0.5rem; border-radius:0.25rem; opacity:0.8; border:none; cursor:pointer; transition:opacity 0.2s; }
+.image-item button:hover { opacity:1; }
+.image-item p { font-size:0.75rem; color:#374151; margin-top:0.25rem; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.modal-buttons { display:flex; justify-content:flex-end; gap:0.5rem; }
+
+/*ITEMS LOCATIONS OPTIONS STYLING: START*/
+.Items-locations-container{
+position: absolute;
+left: 15%;
+top: 15%;
+display: flex;
+flex-wrap: wrap;
+width: 70%;
+height: 70%;
+background: rgba(0, 0, 0, 0.7);
+border-radius: 8px;
+z-index: 1;
+padding: 8px;
+overflow: auto;
+color: white;
+gap: 8px;
+display: none;
+}
+.Items-locations-container ul h3{
+background: var(--accent);
+text-align: center;
+color:var(--brand-black);
+padding:8px;
+border-radius:8px;
+transition:all .18s ease;
+font-weight:700;
+}
+.Items-locations-container ul{
+display: flex;
+flex-direction: column;
+justify-content: flex-start;
+border: 2px solid var(--brand-gold);
+border-radius:8px;
+list-style: none;
+padding: 10px;
+}
+.Items-locations-container ul li{
+background:transparent;
+color:var(--white);
+padding:8px;
+border-radius:8px;
+cursor:pointer;
+transition:all .18s ease;
+font-weight:700;
+}
+.Items-locations-container ul li:hover{
+ background: rgba(255,215,0,0.14); color:var(--gold);
+ cursor: pointer;
+ width: auto;
+}
+.Items-locations-container ul h3:hover{
+ background: rgba(255,215,0,0.14); color:var(--gold);
+ cursor: pointer;
+}
+.search-row h4{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  background: var(--accent);
+  color:#111;
+  /*display: none;*/
+  }
+.search-row h4:hover{
+  cursor: pointer;
+  background: var(--accent-dark);
+  color: white;
+  }
+/*ITEMS LOCATIONS OPTIONS STYLING: END*/
+#LocationsDivTriggerClick{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  background: var(--accent);
+  color:#111;
+  text-align: center;
+}
+#LocationsDivTriggerClick:hover{
+  cursor: pointer;
+  background: var(--accent-dark);
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<div class="category-container">
+  <h2>Select Category</h2>
+  <div class="radio-group">
+    <label><input type="radio" name="category" value="Lands"> Lands</label>
+    <label><input type="radio" name="category" value="Apartments"> Apartments</label>
+    <label><input type="radio" name="category" value="Projects"> Projects</label>
+  </div>
+  <button id="createBtn">Create Item</button>
+</div>
+
+<div id="modal">
+
+<div class="Items-locations-container" id="tems_locations_container_id">
+<ul id="Ahafo_Region">
+<h3 id="RegionStart_Ahafo_Region">Ahafo Region</h3>
+<li id="DistrictSelection_Asunafo_North_Municipal">Asunafo North Municipal</li>
+<li id="DistrictSelection_Asunafo_South_District">Asunafo South District</li>
+<li id="DistrictSelection_Asutifi_North_District">Asutifi North District</li>
+<li id="DistrictSelection_Asutifi_South_District">Asutifi South District</li>
+<li id="DistrictSelection_Tano_North_Municipal">Tano North Municipal</li>
+<li id="DistrictSelection_Tano_South_Municipal">Tano South Municipal.</li>
+</ul>
+
+<ul id="Ashanti_Region">
+<h3 id="RegionStart_Ashanti_Region">Ashanti Region</h3>
+<li id="DistrictSelection_Adansi_Asokwa_District">Adansi Asokwa District</li>
+<li id="DistrictSelection_Adansi_North_District">Adansi North District</li>
+<li id="DistrictSelection_Adansi_South_District">Adansi South District</li>
+<li id="DistrictSelection_Afigya_Kwabre_North_District">Afigya Kwabre North District</li>
+<li id="DistrictSelection_Afigya_Kwabre_South_District">Afigya Kwabre South District</li>
+<li id="DistrictSelection_Ahafo_Ano_North_Municipal">Ahafo Ano North Municipal</li>
+<li id="DistrictSelection_Ahafo_Ano_South_East_District">Ahafo Ano South East District</li>
+<li id="DistrictSelection_Ahafo_Ano_South_West_District">Ahafo Ano South West District</li>
+<li id="DistrictSelection_Akrofuom_District">Akrofuom District</li>
+<li id="DistrictSelection_Amansie_Central_District">Amansie Central District</li>
+<li id="DistrictSelection_Amansie_South_District">Amansie South District</li>
+<li id="DistrictSelection_Atwima_Kwanwoma_District">Atwima Kwanwoma District</li>
+<li id="DistrictSelection_Atwima_Nwabiagya_North_Municipal">Atwima Nwabiagya North Municipal</li>
+<li id="DistrictSelection_Atwima_Nwabiagya_Municipal">Atwima Nwabiagya Municipal</li>
+<li id="DistrictSelection_Bekwai_Municipal">Bekwai Municipal</li>
+<li id="DistrictSelection_Bosomtwe_District">Bosomtwe District</li>
+<li id="DistrictSelection_Ejisu_Municipa">Ejisu Municipa</li>
+<li id="DistrictSelection_Ejura_Sekyedumase_Municipa">Ejura Sekyedumase Municipa</li>
+<li id="DistrictSelection_Ejura_Sekyedumas">Ejura-Sekyedumas</li>
+<li id="DistrictSelection_Kwabre_East_Municipa">Kwabre East Municipa</li>
+<li id="DistrictSelection_Kumasi_Metropolita">Kumasi Metropolita</li>
+<li id="DistrictSelection_Mampong_Municipa">Mampong Municipa</li>
+<li id="DistrictSelection_Manhyia_North_Municipa">Manhyia North Municipa</li>
+<li id="DistrictSelection_Obuasi_Municipa">Obuasi Municipa</li>
+<li id="DistrictSelection_Offinso_Municipa">Offinso Municipa</li>
+<li id="DistrictSelection_Oforikrom_Municipal">Oforikrom Municipal</li>
+<li id="DistrictSelection_Sekyere_Afram_Plains_District">Sekyere Afram Plains District</li>
+<li id="DistrictSelection_Sekyere_Central_District">Sekyere Central District</li>
+<li id="DistrictSelection_Sekyere_East_District">Sekyere East District</li>
+<li id="DistrictSelection_Sekyere_Kumawu_District">Sekyere Kumawu District</li>
+<li id="DistrictSelection_Sekyere_South_District">Sekyere South District</li>
+<li id="DistrictSelection_Sekyere_West_District">Sekyere West District</li>
+<li id="DistrictSelection_Sekyere_North_District">Sekyere North District</li>
+</ul>
+
+<ul id="Bono_Region">
+<h3 id="RegionStart_Bono_Region">Bono Region</h3>
+<li id="DistrictSelection_Banda_District">Banda District</li>
+<li id="DistrictSelection_Berekum_East_Municipal">Berekum East Municipal</li>
+<li id="DistrictSelection_Berekum_West_District">Berekum West District</li>
+<li id="DistrictSelection_Dormaa_Central_Municipal">Dormaa Central Municipal</li>
+<li id="DistrictSelection_Dormaa_East_District">Dormaa East District</li>
+<li id="DistrictSelection_Dormaa_West_District">Dormaa West District</li>
+<li id="DistrictSelection_Jaman_North_District">Jaman North District</li>
+<li id="DistrictSelection_Jaman_South_Municipal">Jaman South Municipal</li>
+<li id="DistrictSelection_Sunyani_Municipal">Sunyani Municipal</li>
+<li id="DistrictSelection_Sunyani_West_District">Sunyani West District</li>
+<li id="DistrictSelection_Tain_District">Tain District</li>
+<li id="DistrictSelection_Wenchi_Municipal">Wenchi Municipal. </li>
+</ul>
+
+<ul id="Bono_East_Region">
+<h3 id="RegionStart_Bono_East_Region">Bono East Region</h3>
+<li id="DistrictSelection_Atebubu_Amantin_Municipal">Atebubu-Amantin Municipal</li>
+<li id="DistrictSelection_Kintampo_North_Municipal">Kintampo North Municipal</li>
+<li id="DistrictSelection_Kintampo_South_District">Kintampo South District</li>
+<li id="DistrictSelection_Nkoranza_North_District">Nkoranza North District</li>
+<li id="DistrictSelection_Nkoranza_South_Municipal">Nkoranza South Municipal</li>
+<li id="DistrictSelection_Pru_East_District">Pru East District</li>
+<li id="DistrictSelection_Pru_West_District">Pru West District</li>
+<li id="DistrictSelection_Sene_East_District">Sene East District</li>
+<li id="DistrictSelection_Sene_West_District">Sene West District</li>
+<li id="DistrictSelection_Techiman_Municipal">Techiman Municipal</li>
+<li id="DistrictSelection_Techiman_North_District">Techiman North District. </li>
+</ul>
+
+<ul id="Central_Region">
+<h3 id="RegionStart_Central_Region">Central Region</h3>
+<li id="DistrictSelection_Abura_Asebu_Kwamankese_District">Abura/Asebu/Kwamankese District</li>
+<li id="DistrictSelection_Agona_East_District">Agona East District</li>
+<li id="DistrictSelection_Agona_West_Municipal">Agona West Municipal</li>
+<li id="DistrictSelection_Ajumako_Enyan_Essiam_District">Ajumako/Enyan/Essiam District</li>
+<li id="DistrictSelection_Asikuma_Odoben_Brakwa_District">Asikuma/Odoben/Brakwa District</li>
+<li id="DistrictSelection_Assin_Central_Municipal">Assin Central Municipal</li>
+<li id="DistrictSelection_Assin_North_District">Assin North District</li>
+<li id="DistrictSelection_Assin_South_District">Assin South District</li>
+<li id="DistrictSelection_Awutu_Senya_East_Municipal">Awutu Senya East Municipal</li>
+<li id="DistrictSelection_Awutu_Senya_West_District">Awutu Senya West District</li>
+<li id="DistrictSelection_Cape_Coast_Metropolitan">Cape Coast Metropolitan</li>
+<li id="DistrictSelection_Effutu_Municipal">Effutu Municipal</li>
+<li id="DistrictSelection_Ekumfi_District">Ekumfi District</li>
+<li id="DistrictSelection_Gomoa_East_Metropolitan">Gomoa East Metropolitan</li>
+<li id="DistrictSelection_Gomoa_West_District">Gomoa West District</li>
+<li id="DistrictSelection_Komenda_Edina_Eguafo_Abirem_Municipal">Komenda/Edina/Eguafo/Abirem Municipal</li>
+<li id="DistrictSelection_Mfantseman">Mfantseman</li>
+<li id="DistrictSelection_Twifo_Heman_Lower_Denkyira_District">Twifo/Heman/Lower Denkyira District</li>
+<li id="DistrictSelection_Upper_Denkyira_East_Municipal">Upper Denkyira East Municipal</li>
+<li id="DistrictSelection_Upper_Denkyira_West_District">Upper Denkyira West District</li>
+</ul>
+
+<ul id="Eastern_Region">
+<h3 id="RegionStart_Eastern_Region">Eastern Region</h3>
+<li id="DistrictSelection_Abuakwa_North_Municipal">Abuakwa North Municipal</li>
+<li id="DistrictSelection_Abuakwa_South_Municipal">Abuakwa South Municipal</li>
+<li id="DistrictSelection_Achiase_District">Achiase District</li>
+<li id="DistrictSelection_Akuapim_North_Municipal">Akuapim North Municipal</li>
+<li id="DistrictSelection_Akuapim_South_District">Akuapim South District</li>
+<li id="DistrictSelection_Akyemansa_District">Akyemansa District</li>
+<li id="DistrictSelection_Asene_Manso_Akroso_District">Asene-Manso-Akroso District</li>
+<li id="DistrictSelection_Asuogyaman_District">Asuogyaman District</li>
+<li id="DistrictSelection_Atiwa_East_District">Atiwa East District</li>
+<li id="DistrictSelection_Atiwa_West_District">Atiwa West District</li>
+<li id="DistrictSelection_Ayensuano_District">Ayensuano District</li>
+<li id="DistrictSelection_Birim_Central_Municipal">Birim Central Municipal</li>
+<li id="DistrictSelection_Birim_North_District">Birim North District</li>
+<li id="DistrictSelection_Birim_South_District">Birim South District</li>
+<li id="DistrictSelection_Denkyembour_District">Denkyembour District</li>
+<li id="DistrictSelection_East_Akim_Municipal">East Akim Municipal</li>
+<li id="DistrictSelection_Fanteakwa_District">Fanteakwa District</li>
+<li id="DistrictSelection_Kwahu_East_District">Kwahu East District</li>
+<li id="DistrictSelection_Kwahu_Afram_Plains_North">Kwahu Afram Plains North</li>
+<li id="DistrictSelection_Kwahu_Afram_Plains_South">Kwahu Afram Plains South</li>
+<li id="DistrictSelection_Kwaebibirem_Municipal">Kwaebibirem Municipal</li>
+<li id="DistrictSelection_New_Juaben_North_Municipal">New Juaben North Municipal</li>
+<li id="DistrictSelection_New_Juaben_South_Municipal">New Juaben South Municipal</li>
+<li id="DistrictSelection_Nsawam_Adoagyiri_Municipal">Nsawam Adoagyiri Municipal</li>
+<li id="DistrictSelection_Upper_West_Akim_Municipal">Upper West Akim Municipal</li>
+<li id="DistrictSelection_West_Akim_Municipal">West Akim Municipal</li>
+</ul>
+
+<ul id="Greater_Accra_Region">
+<h3 id="RegionStart_Greater_Accra_Region">Greater Accra Region</h3>
+<li id="DistrictSelection_Ablekuma_Central_Municipal">Ablekuma Central Municipal</li>
+<li id="DistrictSelection_Ablekuma_North_Municipal">Ablekuma North Municipal</li>
+<li id="DistrictSelection_Ablekuma_West_Municipal">Ablekuma West Municipal</li>
+<li id="DistrictSelection_Accra_Metropolitan">Accra Metropolitan</li>
+<li id="DistrictSelection_Ada_East_District">Ada East District</li>
+<li id="DistrictSelection_Ada_West_District">Ada West District</li>
+<li id="DistrictSelection_Adenta_Municipal">Adenta Municipal</li>
+<li id="DistrictSelection_Ashaiman_Municipal">Ashaiman Municipal</li>
+<li id="DistrictSelection_Ayawaso_Central_Municipal">Ayawaso Central Municipal</li>
+<li id="DistrictSelection_Ayawaso_East_Municipal">Ayawaso East Municipal</li>
+<li id="DistrictSelection_Ayawaso_North_Municipal">Ayawaso North Municipal</li>
+<li id="DistrictSelection_Ayawaso_West_Municipal">Ayawaso West Municipal</li>
+<li id="DistrictSelection_Dade_Kotopon_La_Dade_Kotopon_Municipal">Dade Kotopon (La Dade-Kotopon) Municipal</li>
+<li id="DistrictSelection_Ga_East_Municipal">Ga East Municipal</li>
+<li id="DistrictSelection_Ga_North_Municipal">Ga North Municipal</li>
+<li id="DistrictSelection_Ga_South_Municipal">Ga South Municipal</li>
+<li id="DistrictSelection_Ga_West_Municipal">Ga West Municipal</li>
+<li id="DistrictSelection_Ga_Central_Municipal">Ga Central Municipal</li>
+<li id="DistrictSelection_Kpone_Katamanso_Municipal">Kpone Katamanso Municipal</li>
+<li id="DistrictSelection_La_Nkwantanang_Madina_Municipal">La Nkwantanang-Madina Municipal</li>
+<li id="DistrictSelection_Ledzokuku_Krowor_Municipal">Ledzokuku-Krowor Municipal</li>
+<li id="DistrictSelection_Ningo_Prampram_District">Ningo Prampram District</li>
+<li id="DistrictSelection_Shai_Osudoku_District">Shai-Osudoku District</li>
+<li id="DistrictSelection_Tema_Metropolitan">Tema Metropolitan</li>
+<li id="DistrictSelection_Tema_West_Municipal">Tema West Municipal</li>
+<li id="DistrictSelection_Weija_Gbawe_Municipal">Weija Gbawe Municipal</li>
+</ul>
+
+<ul id="Northern_Region">
+<h3 id="RegionStart_Northern_Region">Northern Region</h3>
+<li id="DistrictSelection_Tamale_Metropolitan">Tamale Metropolitan</li>
+<li id="DistrictSelection_East_Mamprusi_District">East Mamprusi District</li>
+<li id="DistrictSelection_West_Mamprusi_District">West Mamprusi District</li>
+<li id="DistrictSelection_Nanumba_North_Municipal">Nanumba North Municipal</li>
+<li id="DistrictSelection_Nanumba_South_District">Nanumba South District</li>
+<li id="DistrictSelection_Bole_District">Bole District</li>
+<li id="DistrictSelection_East_Gonja_District">East Gonja District</li>
+<li id="DistrictSelection_Central_Gonja_District">Central Gonja District</li>
+<li id="DistrictSelection_North_Gonja_District">North Gonja District</li>
+<li id="DistrictSelection_Savelugu_Municipal">Savelugu Municipal</li>
+<li id="DistrictSelection_Tatale_Sangule_District">Tatale-Sangule District</li>
+<li id="DistrictSelection_Saboba_District">Saboba District</li>
+<li id="DistrictSelection_Kpandai_District">Kpandai District</li>
+<li id="DistrictSelection_Kumbungu_District">Kumbungu District</li>
+<li id="DistrictSelection_Mion_District">Mion District</li>
+<li id="DistrictSelection_Nanton_District">Nanton District. </li>
+</ul>
+
+<ul id="North_East_Region">
+<h3 id="RegionStart_North_East_Region">North East Region</h3>
+<li id="DistrictSelection_Bunkpurugu_Nalerigu_Bunkpurugu">Bunkpurugu-Nalerigu / Bunkpurugu</li>
+<li id="DistrictSelection_Chereponi">Chereponi</li>
+<li id="DistrictSelection_East_Mamprusi">East Mamprusi</li>
+<li id="DistrictSelection_Mamprugu_Moagduri_Yunyoo_Nasuan">Mamprugu Moagduri / Yunyoo-Nasuan</li>
+</ul>
+
+<ul id="Oti_Region">
+<h3 id="RegionStart_Oti_Region">Oti Region</h3>
+<li id="DistrictSelection_Biakoye_District">Biakoye District</li>
+<li id="DistrictSelection_Guan_District">Guan District</li>
+<li id="DistrictSelection_Jasikan_Municipal">Jasikan Municipal</li>
+<li id="DistrictSelection_Kadjebi_District">Kadjebi District</li>
+<li id="DistrictSelection_Krachi_East_Municipal">Krachi East Municipal</li>
+<li id="DistrictSelection_Krachi_Nchumuru_District">Krachi Nchumuru District</li>
+<li id="DistrictSelection_Krachi_West_Municipal">Krachi West Municipal</li>
+<li id="DistrictSelection_Nkwanta_North_District">Nkwanta North District</li>
+<li id="DistrictSelection_Nkwanta_South_Municipal">Nkwanta South Municipal.</li>
+</ul>
+<ul id="Savannah_Region">
+<h3 id="RegionStart_Savannah_Region">Savannah Region</h3>
+<li id="DistrictSelection_Bole_District">Bole District</li>
+<li id="DistrictSelection_Sawla_Tuna_Kalba_District_Sawla_Tuna_Kalba">Sawla-Tuna-Kalba District (Sawla/Tuna/Kalba)</li>
+<li id="DistrictSelection_West_Gonja_District">West Gonja District</li>
+<li id="DistrictSelection_North_Gonja">North Gonja</li>
+</ul>
+
+<ul id="Upper_East_Region">
+<h3 id="RegionStart_Upper_East_Region">Upper East Region</h3>
+<li id="DistrictSelection_Bolgatanga_Municipal">Bolgatanga Municipal</li>
+<li id="DistrictSelection_Bolgatanga_East_District">Bolgatanga East District</li>
+<li id="DistrictSelection_Bawku_Municipal">Bawku Municipal</li>
+<li id="DistrictSelection_Bawku_West_District">Bawku West District</li>
+<li id="DistrictSelection_Binduri_District">Binduri District</li>
+<li id="DistrictSelection_Bongo_District">Bongo District</li>
+<li id="DistrictSelection_Builsa_North_Municipal">Builsa North Municipal</li>
+<li id="DistrictSelection_Builsa_South_District">Builsa South District</li>
+<li id="DistrictSelection_Garu_District">Garu District</li>
+<li id="DistrictSelection_Kassena_Nankana_Municipal">Kassena-Nankana Municipal</li>
+<li id="DistrictSelection_Kassena_Nankana_West_District">Kassena-Nankana West District</li>
+<li id="DistrictSelection_Nabdam_District">Nabdam District</li>
+<li id="DistrictSelection_Pusiga_District">Pusiga District</li>
+<li id="DistrictSelection_Talensi_District">Talensi District</li>
+<li id="DistrictSelection_Tempane_District">Tempane District.</li>
+</ul>
+
+<ul id="Upper_West_Region">
+<h3 id="RegionStart_Upper_West_Region">Upper West Region</h3>
+<li id="DistrictSelection_Daffiama_Bussie_Issa_District">Daffiama-Bussie-Issa District</li>
+<li id="DistrictSelection_Jirapa_Municipal">Jirapa Municipal</li>
+<li id="DistrictSelection_Lambussie_Karni_District">Lambussie-Karni District</li>
+<li id="DistrictSelection_Lawra_Municipal">Lawra Municipal</li>
+<li id="DistrictSelection_Nadowli_Kaleo_District">Nadowli-Kaleo District</li>
+<li id="DistrictSelection_Nandom_Municipal">Nandom Municipal</li>
+<li id="DistrictSelection_Sissala_East_Municipal">Sissala East Municipal</li>
+<li id="DistrictSelection_Sissala_West_District">Sissala West District</li>
+<li id="DistrictSelection_Wa_Municipal">Wa Municipal</li>
+<li id="DistrictSelection_Wa_East_District">Wa East District</li>
+<li id="DistrictSelection_Wa_West_District">Wa West District.</li>
+</ul>
+
+<ul id="Volta_Region">
+<h3 id="RegionStart_Volta_Region">Volta Region</h3>
+<li id="DistrictSelection_Adaklu_District">Adaklu District</li>
+<li id="DistrictSelection_Afadzato_South_District">Afadzato South District</li>
+<li id="DistrictSelection_Agotime_Ziope_District">Agotime-Ziope District</li>
+<li id="DistrictSelection_Akatsi_North_District">Akatsi North District</li>
+<li id="DistrictSelection_Akatsi_South_District">Akatsi South District</li>
+<li id="DistrictSelection_Anloga_District">Anloga District</li>
+<li id="DistrictSelection_Central_Tongu_District">Central Tongu District</li>
+<li id="DistrictSelection_Ho_Municipal">Ho Municipal</li>
+<li id="DistrictSelection_Ho_West_District">Ho West District</li>
+<li id="DistrictSelection_Hohoe_Municipal">Hohoe Municipal</li>
+<li id="DistrictSelection_Keta_Municipal">Keta Municipal</li>
+<li id="DistrictSelection_Ketu_North_District">Ketu North District</li>
+<li id="DistrictSelection_Ketu_South_Municipal">Ketu South Municipal</li>
+<li id="DistrictSelection_Krachi_East_Krachi_West">Krachi East / Krachi West</li>
+<li id="DistrictSelection_North_Tongu_District">North Tongu District</li>
+<li id="DistrictSelection_South_Tongu_District">South Tongu District</li>
+<li id="DistrictSelection_Nkwanta_North_South">Nkwanta North & South </li>
+</ul>
+
+<ul id="Western_Region">
+<h3 id="RegionStart_Western_Region">Western Region</h3>
+<li id="DistrictSelection_Sekondi_Takoradi_Metropolitan">Sekondi-Takoradi Metropolitan</li>
+<li id="DistrictSelection_Tarkwa_Nsuaem_Municipal">Tarkwa-Nsuaem Municipal</li>
+<li id="DistrictSelection_Prestea_Huni_Valley_Municipal">Prestea-Huni Valley Municipal</li>
+<li id="DistrictSelection_Wassa_Amenfi_East">Wassa Amenfi East</li>
+<li id="DistrictSelection_Bibiani_Anhwiaso_Bekwai_Municipal">Bibiani-Anhwiaso-Bekwai Municipal</li>
+<li id="DistrictSelection_Bia_East_Bia_West_Western_North">Bia East / Bia West (Western North)</li>
+</ul>
+
+<ul id="Western_North_Region">
+<h3 id="RegionStart_Western_North_Region">Western North Region</h3>
+<li id="DistrictSelection_Bibiani_Anhwiaso_Bekwai_Municipal">Bibiani-Anhwiaso-Bekwai Municipal</li>
+<li id="DistrictSelection_Bodi_District">Bodi District</li>
+<li id="DistrictSelection_Bia_East_Bia_West_Districts">Bia East / Bia West Districts</li>
+<li id="DistrictSelection_Amenfi_East_West_related_districts">Amenfi East / West related districts</li>
+</ul>
+</div>
+
+  <div id="modalContent">
+    <h3 class="modal-title">Create New Item</h3>
+    <label>
+      <span>Title</span>
+      <textarea id="ItemTitle" maxlength="200" placeholder="Enter item title (max 200 characters)" required></textarea>
+      <small id="TitleCount">0 / 200</small>
+    </label>
+    <label>
+      <span>Upload Images (3 - 5 required)</span>
+      <input type="file" id="images" accept="image/*" multiple>
+      <small id="imageCount">0 / 5 selected</small>
+    </label>
+
+    <div id="imagePreview"></div>
+
+    <label>
+      <span>Description</span>
+      <textarea id="description" maxlength="400" placeholder="Enter item description (max 400 characters)" required></textarea>
+      <small id="descriptionCount">0 / 400</small>
+    </label>
+
+    <label>
+      <span>Location</span>
+      <h4 id="LocationsDivTriggerClick">Click to select location</h4>
+    </label>
+
+    <label>
+      <span>Price (GHC)</span>
+      <input type="number" id="price" placeholder="Enter price">
+    </label>
+
+    <div class="modal-buttons">
+      <button id="cancelBtn">Cancel</button>
+      <button id="saveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+document.body.classList.add("loaded");
+});
+
+var Referred_by = document.referrer;
+const Radio_Group = document.querySelector('.radio-group');
+var Radio_GroupTextContent = Radio_Group ? Radio_Group.textContent : "";
+
+if (Referred_by.includes('BnChtml')) {
+let dynamic_html_BnChtml=`
+<label><input type="radio" name="category" value="Mason"> Mason</label>
+<label><input type="radio" name="category" value="Carpenter"> Carpenter</label>
+<label><input type="radio" name="category" value="Steel Bender"> Steel Bender</label>
+<label><input type="radio" name="category" value="Electrician"> Electrician</label>
+<label><input type="radio" name="category" value="Painter"> Painter</label>
+<label><input type="radio" name="category" value="Architect"> Architect</label>
+`
+Radio_Group.innerHTML=dynamic_html_BnChtml;
+}
+if (Referred_by.includes('PR_html')) {
+let dynamic_html_PR_html=`
+<label><input type="radio" name="category" value="Standard Rooms"> Standard Rooms</label>
+<label><input type="radio" name="category" value="Apartments"> Apartments</label>
+<label><input type="radio" name="category" value="Items for Hire"> Items for Hire</label>
+<label><input type="radio" name="category" value="Items for Sale"> Items for Sale</label>
+`
+Radio_Group.innerHTML=dynamic_html_PR_html;
+}
+
+
+const modal = document.getElementById('modal');
+const modalContent = document.getElementById('modalContent');
+const createBtn = document.getElementById('createBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+const imagesInput = document.getElementById('images');
+const imagePreview = document.getElementById('imagePreview');
+const imageCount = document.getElementById('imageCount');
+const LocationsDivTriggerClick = document.getElementById('LocationsDivTriggerClick');
+const description = document.getElementById('description');
+const descriptionCount = document.getElementById('descriptionCount');
+const ItemTitle = document.getElementById('ItemTitle');
+const TitleCount = document.getElementById('TitleCount');
+
+const MAX_IMAGES=5, MIN_IMAGES=3, MAX_FILE_SIZE=5*1024*1024, MIN_FILE_SIZE=100*1024;
+let selectedImages=[];
+
+// Live char count
+var Title_len=0;
+var title_value='';
+ItemTitle.addEventListener('input', () => {
+  title_value = ItemTitle.value.trim();
+  Title_len = title_value.length;
+  TitleCount.textContent = `${Title_len} / 200`;
+});
+
+description.addEventListener('input', () => {
+  descriptionCount.textContent = `${description.value.length} / 400`;
+});
+
+createBtn.addEventListener('click',()=>{ 
+  const selectedCategory=document.querySelector('input[name="category"]:checked'); 
+  if(!selectedCategory) return alert("Please select a category before creating an item."); 
+  modal.classList.add('show'); 
+  modalContent.classList.add('highlighted'); 
+  setTimeout(()=>modalContent.classList.remove('highlighted'),1000); 
+});
+
+cancelBtn.addEventListener('click',()=>{ 
+  const hasInput=selectedImages.length>0 || LocationsDivTriggerClick.textContent.trim()!=="Click to select location" || document.getElementById('price').value.trim()!=="" || description.value.trim()!=="";
+  if(hasInput){ if(!confirm("You have unsaved changes. Are you sure you want to cancel?")) return; } 
+  modal.classList.remove('show'); 
+  resetForm(); 
+});
+
+imagesInput.addEventListener('change',()=>{ 
+  const newFiles=Array.from(imagesInput.files); 
+  const validFiles=[]; 
+  newFiles.forEach(file=>{
+    if(!file.type.startsWith('image/')) alert(`File "${file.name}" is not an image.`);
+    else if(file.size>MAX_FILE_SIZE) alert(`File "${file.name}" is too large. Max 5MB.`);
+    else if(file.size<MIN_FILE_SIZE) alert(`File "${file.name}" is too small. Min 100KB.`);
+    else validFiles.push(file);
+  });
+
+  const filteredFiles=validFiles.filter(newFile=>!selectedImages.some(existingFile=>existingFile.name===newFile.name && existingFile.size===newFile.size));
+  if(selectedImages.length+filteredFiles.length>MAX_IMAGES){ alert(`You can only select up to ${MAX_IMAGES} images.`); imagesInput.value=""; return; }
+  selectedImages=[...selectedImages,...filteredFiles]; renderPreview(); imagesInput.value="";
+});
+
+function renderPreview(){ 
+  imagePreview.innerHTML=""; 
+  selectedImages.forEach((file,index)=>{ 
+    const reader=new FileReader(); 
+    reader.onload=e=>{ 
+      const div=document.createElement("div"); 
+      div.className="image-item"; 
+      div.innerHTML=`<img src="${e.target.result}"><button data-index="${index}">X</button><p>${file.name}</p>`; 
+      imagePreview.appendChild(div); 
+      div.querySelector("button").addEventListener("click",()=>{ 
+        selectedImages.splice(index,1); renderPreview(); 
+      }); 
+    }; 
+    reader.readAsDataURL(file); 
+  }); 
+  imageCount.textContent=`${selectedImages.length} / ${MAX_IMAGES} selected`;
+}
+
+document.getElementById('saveBtn').addEventListener('click',()=>{ 
+  const category=document.querySelector('input[name="category"]:checked'); 
+  const location=LocationsDivTriggerClick.textContent.trim(); 
+  const price=document.getElementById('price').value.trim(); 
+  const desc=description.value.trim();
+
+  if(!category) return alert("Category is required.");
+  if(Title_len == 0) return alert("Title is required.");
+  if(Title_len>200) return alert("Title must be 200 characters or fewer.");
+  if(selectedImages.length<MIN_IMAGES) return alert(`Please select at least ${MIN_IMAGES} images.`); 
+  if(location==="Click to select location") return alert("Location is required."); 
+  if(!price||Number(price)<=0) return alert("Please enter a valid price."); 
+  if(!desc) return alert("Description is required."); 
+  if(desc.length>400) return alert("Description must be 400 characters or fewer.");
+  let NewItemCreated = {
+                        'ItemTitle':title_value,
+                        'category':category.value,
+                        'location':location,
+                        'price':price,
+                        'desc':desc,
+                        'selectedImages':selectedImages
+                       };
+  alert(`Item created under category: ${category.value}\nCheck console for details.`); 
+  modal.classList.remove('show');
+  window.location.href=Referred_by;
+  resetForm(); 
+});
+
+function resetForm(){ 
+  selectedImages=[]; 
+  renderPreview();
+  LocationsDivTriggerClick.textContent='Click to select location';
+  document.getElementById('price').value="";
+  ItemTitle.value = '';
+  title_value = "";
+  Title_len = 0;
+  TitleCount.textContent = `0 / 200`;
+  description.value="";
+  descriptionCount.textContent="0 / 400";
+  imageCount.textContent=`0 / ${MAX_IMAGES} selected`; 
+}
+
+/*ITEMS LOCATIONS SEARCH JS CODE: START*/
+const eid = (id) => document.getElementById(id);
+const tems_locations_container_id = eid('tems_locations_container_id');
+
+window.addEventListener('click', (event) => {
+  let tElement = event.target;
+
+  let clickedInsideTrigger = LocationsDivTriggerClick.contains(tElement);
+  let clickedInsideContainer = tems_locations_container_id && tems_locations_container_id.contains(tElement);
+
+  if (!clickedInsideTrigger && !clickedInsideContainer && tems_locations_container_id) {
+    tems_locations_container_id.style.display = 'none';
+  }
+});
+
+LocationsDivTriggerClick.addEventListener('click', () => {
+  if(!tems_locations_container_id) return;
+  tems_locations_container_id.style.top = '0';
+  var INNER_HEIGHT_D = window.innerHeight;
+  tems_locations_container_id.style.display = 'flex';
+  var tems_locations_container_id_clientHeight=tems_locations_container_id.offsetHeight;
+  var mrgTop=Math.round((INNER_HEIGHT_D-tems_locations_container_id_clientHeight)/2);
+  tems_locations_container_id.style.transition = 'top 1s linear';
+  setTimeout(() => {
+    tems_locations_container_id.style.top = `${mrgTop}px`;
+  }, 50);
+});
+if(tems_locations_container_id){
+  tems_locations_container_id.addEventListener('click', (event) => {
+    const clickedElement = event.target;
+    if (clickedElement !== tems_locations_container_id && tems_locations_container_id.contains(clickedElement)) {
+      if (clickedElement.childNodes.length === 1) {
+        const clickedText = clickedElement.textContent.trim();
+        LocationsDivTriggerClick.innerHTML = clickedText;
+        tems_locations_container_id.style.display = 'none';
+      }
+    }
+  });
+}
+/*ITEMS LOCATIONS SEARCH JS CODE: END*/
+</script>
+
+</body>
+</html>

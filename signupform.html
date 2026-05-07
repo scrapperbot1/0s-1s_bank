@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .form-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    .gender-options {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    .gender-options label {
+      font-weight: normal;
+    }
+    button {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 0.8rem;
+      background: #007bff;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 1.5rem 0;
+      color: #555;
+      font-size: 0.9rem;
+    }
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid #ccc;
+    }
+    .divider:not(:empty)::before {
+      margin-right: 0.75em;
+    }
+    .divider:not(:empty)::after {
+      margin-left: 0.75em;
+    }
+    .login-link {
+      display: block;
+      text-align: center;
+      margin-top: -0.5rem;
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .login-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Signup Form</h2>
+    <form>
+      <label for="fullname">Full Name</label>
+      <input type="text" id="fullname" name="fullname" required>
+
+      <label for="region">Region</label>
+      <select id="region" name="region" required>
+        <option value="">-- Select Region --</option>
+        <option value="Ahafo">Ahafo</option>
+        <option value="Ashanti">Ashanti</option>
+        <option value="Bono">Bono</option>
+        <option value="Bono East">Bono East</option>
+        <option value="Central">Central</option>
+        <option value="Eastern">Eastern</option>
+        <option value="Greater Accra">Greater Accra</option>
+        <option value="North East">North East</option>
+        <option value="Northern">Northern</option>
+        <option value="Oti">Oti</option>
+        <option value="Savannah">Savannah</option>
+        <option value="Upper East">Upper East</option>
+        <option value="Upper West">Upper West</option>
+        <option value="Volta">Volta</option>
+        <option value="Western">Western</option>
+        <option value="Western North">Western North</option>
+      </select>
+
+      <label for="tel">Telephone</label>
+      <input type="tel" id="tel" name="tel" placeholder="e.g. 0241234567" required pattern="[0-9]{10}">
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+
+      <label>Gender</label>
+      <div class="gender-options">
+        <label><input type="radio" name="gender" value="Male" required> Male</label>
+        <label><input type="radio" name="gender" value="Female"> Female</label>
+        <label><input type="radio" name="gender" value="Other"> Other</label>
+      </div>
+
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <div class="divider">Or login</div>
+    <a href="login.html" class="login-link">Login</a>
+  </div>
+
+</body>
+</html>

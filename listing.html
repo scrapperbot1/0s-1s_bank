@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/x-icon" href="http://localhost/LandingPageRecs/mascomlogo.jpeg">
+<title>Property Listing — Reviews (Delete + Report fixed)</title>
+<style>
+  :root{
+    --bg:#f9f9f9;
+    --card:#fff;
+    --accent:#32CD32;
+    --accent:#FFD700;
+    --muted:#777;
+    --brand:#0077cc;
+    --brand-gold:#D4AF37;
+    --accent-dark:#B8860B;
+    --brand-black:#000000;
+  }
+  body{margin:0;font-family:system-ui,Arial;background:var(--bg);padding:20px;color:#222;}
+  * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+}
+input:focus,
+textarea:focus{
+  outline: none;
+  border-color: #32CD32;
+  box-shadow: 0 0 4px rgba(50, 205, 50, 0.6);
+}
+
+  .property-card{
+max-width:75%;
+margin:0 auto;
+background:var(--card);
+border-radius:12px;box-shadow:0 6px 20px var(--brand-gold);
+overflow:hidden;
+ }
+  .property-header{display:flex;justify-content:space-between;gap:12px;padding:16px;border-bottom:1px solid #eee;background:#fafafa;align-items:center;}
+  .user-info{display:flex;gap:12px;align-items:center;}
+  .user-info img{width:52px;height:52px;border-radius:50%;object-fit:cover;}
+  .property-price{font-weight:700;color:limegreen;font-size:18px;}
+  .property-details{padding:18px;}
+  .property-meta{display:flex;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:14px;margin-bottom:12px;}
+  .property-meta div a{
+    text-decoration: none;
+    color: var(--muted);
+  }
+#sellerName a{
+text-decoration: none;
+color: black;
+}
+  .property-meta div a:hover,
+  #sellerName a:hover{
+    color: var(--brand-gold);
+    transition: 0.3s ease;
+  }
+  .property-images{display:flex;gap:10px;overflow-x:auto;margin:12px 0 16px;padding-bottom:6px;}
+  .property-images img{width:300px;height:200px;object-fit:cover;border-radius:8px;flex-shrink:0;}
+  .actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
+  .actions button{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;background:#efefef;}
+#chatBtn,
+#submitReview,
+#submitReply,
+.modal-actions .btn-primary{
+background: var(--accent);
+text-align: center;
+color:var(--brand-black);
+padding:8px;
+border-radius:8px;
+transition:all .18s ease;
+font-weight:700;
+}
+#submitReview:hover,
+#submitReply:hover,
+.modal-actions .btn-primary:hover{
+background: var(--accent-dark);
+color: white;
+cursor: pointer;
+transition: 0.5s ease;
+}
+  .btn-primary{background:var(--accent);color:#fff;border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:600;border:0;}
+  .review-section{padding:18px;border-top:1px solid #eee;}
+  .star-rating{display:flex;gap:6px;font-size:20px;color:#bbb;user-select:none;}
+  .star-rating .star.active{color:gold;}
+  textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #ddd;font-size:14px;resize:vertical;background:#fff;}
+  .reviews-list{margin-top:16px;}
+  .review_list_item{margin-top:16px;margin-bottom:12px;padding:10px;border-radius:8px;background:#fbfbfb;border:1px solid var(--brand-gold);
+  border-left: 1px solid limegreen;position: relative;}
+  span[class*='review-header']{display:flex;position:absolute;align-items:center;gap:10px;margin-bottom:6px;left:100px;/*background: blue;width:50px;height:50px;*/}
+  .review-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;}
+  .review-author{font-weight:700;font-size:14px;}
+  .review-meta{color:var(--muted);font-size:13px;margin-left:6px;}
+  .review-text{white-space:pre-wrap;margin-top:6px;font-size:14px;color:#222;}
+  .review-actions{display:flex;gap:12px;margin-top:8px;align-items:center;color:var(--brand);flex-wrap:wrap;}
+  .review-actions button{background:transparent;border:0;padding:0;cursor:pointer;color:var(--brand);font-weight:600;}
+  .like-count{font-weight:700;margin-left:6px;color:#333;}
+  .replies{margin-top:10px;}
+  #replyBox{margin-top:10px;display:none;max-width:760px;}
+  #replyBox .reply-actions{display:flex;gap:8px;margin-top:8px;justify-content:flex-end;}
+  .reply-actions #cancelReply{ background:#fca5a5; color:black; border:1.5px solid #f87171; }
+  .modal-actions #cancelReport{
+  background:#fca5a5; 
+  color:black; 
+  border:1.5px solid #f87171;
+  padding:8px;
+  border-radius:8px;
+  }
+  .reply-actions #cancelReply:hover,
+  .modal-actions #cancelReport:hover{ background:#ef4444; color:white; transition:0.3s ease;}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:999;}
+  .modal{background:#fff;padding:20px;border-radius:10px;max-width:400px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+  .modal h4{margin:0 0 12px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
+  .badge-reported{background:#ff4d4d;color:#fff;padding:2px 6px;border-radius:6px;font-size:12px;margin-left:6px;display:inline-flex;align-items:center;gap:6px;}
+  .small-btn{background:transparent;border:0;color:inherit;cursor:pointer;padding:0;font-size:13px;}
+
+/*CHAT ELEMENTS STYLING: END*/
+#chatBtn{
+background: var(--accent);
+text-align: center;
+color:var(--brand-black);
+padding:8px;
+border-radius:8px;
+transition:all .18s ease;
+font-weight:700;
+}
+#chatBtn:hover{
+background: var(--accent-dark);
+color: white;
+cursor: pointer;
+transition: 0.5s ease;
+}
+#MessagesScreen{
+position: absolute;
+display: flex;
+flex-direction: column;
+background: rgba(0, 0, 0, 0.75);
+width: 50vw;
+top: 20px;
+left: 25vw;
+z-index: 1;
+border-radius: 10px;
+padding: 4px;
+border: 1px solid yellow;
+overflow-y: auto;
+display: none;
+}
+#messageBoxTwins{
+display: flex;
+flex-wrap: wrap;
+justify-content: space-between;
+gap:5px;
+padding: 10px;
+overflow-x: auto;
+}
+#MessagesScreen{
+/*display: flex;*/
+gap: 10px;
+}
+#MessageBoxLeftBar{
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 8px;
+background: whitesmoke;
+width: 35%;
+border-radius: 10px;
+padding: 8px;
+}
+#MessageBoxLeftBar p{
+display: flex;
+justify-content: space-between;
+border: 1px solid #ccc; 
+border-radius: 6px;
+font-size: 12px;
+width: 100%;
+padding: 8px;
+}
+#MessageBoxLeftBar p button{
+background: blue;
+border: none;
+font-size: 16px;
+cursor: pointer;
+color: red;
+background: transparent;
+display: none;
+}
+#MessageBoxLeftBar p:hover{
+cursor: pointer;
+color: var(--brand-gold);
+transition: color 0.5s;
+}
+#MessageBoxLeftBar p:hover button{
+display: block;
+}
+/* ===== CHAT BOX ===== */
+#MessageChatBox{
+display: flex;
+flex-direction: column;
+align-items: center;
+position: relative;
+background: whitesmoke;
+width: 55%;
+border-radius: 10px;
+}
+
+/* Header */
+.chat-header {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid var(--brand-gold);
+  border-radius: 10px;
+}
+#Your_messages_header{
+background: var(--accent);
+text-align: center;
+color:var(--brand-black);
+padding:8px;
+border-radius:8px;
+transition:all .18s ease;
+font-weight:700;
+}
+
+#Your_messages_header:hover{
+background:var(--accent-dark);
+color:white;
+cursor: pointer;
+}
+#closeChatMsg{
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  background: red;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  width: 37px;
+  height: 37px;
+  border-radius: 10px;
+}
+
+/* Body */
+.chat-body {
+  padding: 10px;
+  height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.chat-body div a{
+text-decoration: none;
+color: black;
+}
+.chat-body div a:hover{
+color: var(--brand-gold);
+transition: 0.3s ease;
+}
+.chat-body div{
+  padding: 8px 12px;
+  margin: 6px 0;
+  border-radius: 8px;
+  max-width: 75%;
+}
+
+.message-received {
+  background: #e5e5ea;
+  align-self: flex-start;
+}
+
+.message-sent {
+  background: #0078ff;
+  color: white;
+  align-self: flex-end;
+}
+
+/* Footer */
+.chat-footer {
+  position: relative;
+  display: flex;
+  border-top: 1px solid var(--brand-gold);
+  padding: 8px;
+  bottom: 0;
+  height: 50px;
+  width: 100%;
+}
+
+.chat-footer img{
+position: absolute;
+top: 10px;
+left: 10px;
+width: 29px;
+height: 29px;
+background: whitesmoke;
+border: 1px solid var(--brand-gold);
+opacity: 0.65;
+border-radius: 4px;
+}
+.chat-footer img:hover{
+cursor: pointer;
+}
+.chat-footer input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+}
+
+#chatInput{
+padding-left: 35px;
+}
+
+
+.chat-footer button{
+margin-left: 8px;
+background: var(--accent);
+text-align: center;
+color:var(--brand-black);
+border: none;
+padding: 8px 12px;
+border-radius: 6px;
+transition:all .18s ease;
+font-weight:700;
+border: none;
+}
+
+.chat-footer button:hover{
+background: var(--accent-dark);
+color: white;
+cursor: pointer;
+transition: 0.5s ease;
+}
+/*CHAT ELEMENTS STYLING: END*/
+#Telephone:hover{
+color: var(--brand-gold);
+cursor: pointer;
+transition: 0.3s ease;
+}
+</style>
+</head>
+<body>
+<div id="MessagesScreen">
+<p id="Your_messages_header">Your messages
+<button id="closeChatMsg">&times;</button>
+</p>
+<div id="messageBoxTwins">
+<div id="MessageBoxLeftBar">
+<p id="user1">
+  Janet Brown sent you a message
+  <button onclick="eid('user1').style.display='none'">✖</button>
+</p>
+
+<p id="user2">
+  Agyeman Badu liked your advert
+  <button onclick="eid('user2').style.display='none'">✖</button>
+</p>
+
+<p id="user3">
+  Joseph Amoah sent you a message
+  <button onclick="eid('user3').style.display='none'">✖</button>
+</p>
+</div>
+<form style="display:none">
+  <input type="file" id="ShareImage" name="" accept="image/*">
+</form>
+<div id="MessageChatBox">
+    <div class="chat-header">
+      <span>Chat with John</span>
+    </div>
+    <div class="chat-body">
+      <div class="message-received">Hey, how are you?</div>
+      <div class="message-sent">I’m good, you?</div>
+    </div>
+    <div class="chat-footer">
+      <img src="http://localhost/LandingPageRecs/photoIcon.png" alt="SendImage" id="ChatImageShare">
+      <input type="text" id="chatInput" placeholder="Type a message...">
+      <button id="sendMessage">Send</button>
+    </div>
+</div>
+</div>
+</div>
+<div class="property-card">
+  <div class="property-header">
+    <div id="sellerContainer" class="user-info">
+      <img src="https://randomuser.me/api/portraits/men/32.jpg" id="Seller_avatar" alt="Seller avatar">
+      <div class="user-meta">
+        <strong id="sellerName">Kwesi Innocent</strong>
+        <a href="tel:+233555972390" style="color:var(--muted); font-size:13px;display: block; text-decoration: none;" id="Telephone">📞 +233 55 597 2390</a>
+        <em style="color:#777;" id="user_registration_date">member since: 23/09/2022. 2yrs</em>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+      <div class="property-price" id="property_price_id">GHS 1,200,000</div>
+      <button id="reportSellerBtn" style="background:transparent;border:0;color:#d00;cursor:pointer;font-weight:600;">⚠ Report Seller</button>
+    </div>
+  </div>
+
+  <div class="property-details">
+    <h2 id="AdvertTitle" name="AdvertUniqueId">3-Bedroom House for Sale at East Legon</h2>
+    <div class="property-meta">
+      <div>📅 Posted: Sept 24, 2025</div>
+      <div>🏷️ Category: Real Estate</div>
+      <div>📍 Location: East Legon, Accra</div>
+      <div>👁️ Views: <span id="viewsCount">150</span></div>
+      <div>👍 Likes: <span id="likesCount">20</span></div>
+    </div>
+    <div class="property-images" id="property_images">
+      <img src="http://localhost/LandingPageRecs/user_photos/IMG20250628112234.jpg" alt="Property image 1">
+      <img src="http://localhost/LandingPageRecs/user_photos/IMG20250628112400.jpg" alt="Property image 2">
+      <img src="http://localhost/LandingPageRecs/user_photos/IMG20250628123243.jpg" alt="Property image 3">
+    </div>
+    <p id="AdvertDescription">Beautiful 3-bedroom house located in a serene environment. Comes with 2 bathrooms,
+      spacious living room, fitted kitchen, and a big compound.</p>
+    <div class="actions">
+      <button id="sellerLikeBtn">👍 Like <span id="sellerLikeCounter">0</span></button>
+      <button id="sellerFavBtn">⭐ Add to Favourite</button>
+      <button id="chatBtn" class="btn-primary">💬 Chat Seller</button>
+    </div>
+  </div>
+
+  <div class="review-section">
+    <h3>Leave a Review</h3>
+    <div class="star-rating" id="starRating">
+      <span class="star" data-index="0">★</span>
+      <span class="star" data-index="1">★</span>
+      <span class="star" data-index="2">★</span>
+      <span class="star" data-index="3">★</span>
+      <span class="star" data-index="4">★</span>
+    </div>
+    <textarea id="reviewText" rows="3" placeholder="Write your review..."></textarea>
+    <div style="text-align:right; margin-top:8px;">
+      <button id="submitReview" class="btn-primary">Submit Review</button>
+    </div>
+    <div class="reviews-list" id="reviewsList"></div>
+  </div>
+</div>
+
+<!-- reply box -->
+<div id="replyBox">
+  <textarea id="replyText" rows="2" class="reply-textarea" placeholder="Write your reply..."></textarea>
+  <div class="reply-actions">
+    <button id="submitReply" class="btn-primary">Reply</button>
+    <button id="cancelReply" class="small-btn" style="border-radius:6px;padding:8px 10px;">Cancel</button>
+  </div>
+</div>
+
+<!-- report modal -->
+<div class="modal-backdrop" id="reportModal" role="dialog" aria-modal="true" aria-hidden="false">
+  <div class="modal">
+    <h4>Report</h4>
+    <form id="reportForm">
+      <label><input type="radio" name="reason" value="Spam" required> Spam</label>
+      <label><input type="radio" name="reason" value="Inappropriate"> Inappropriate</label>
+      <label><input type="radio" name="reason" value="Scam"> Scam</label>
+      <label><input type="radio" name="reason" value="Other"> Other</label>
+      <textarea id="reportDetails" rows="3" placeholder="Additional details (optional) (max 200 characters)" maxlength="200"></textarea>
+      <div class="modal-actions">
+        <button type="button" id="cancelReport" class="small-btn">Cancel</button>
+        <button id="submitReportBtn" type="button" class="btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const eid = (id) => document.getElementById(id);
+var Referred_by = document.referrer;
+function makeDraggable(childElement, parentElementOverride = null) {
+  const parentElement = parentElementOverride || childElement.parentElement;
+  let isDragging = false;
+  let offsetX = 0, offsetY = 0;
+
+  function startDrag(e) {
+    e.preventDefault();
+    isDragging = true;
+    parentElement.style.cursor = "grabbing";
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    offsetX = clientX - parentElement.offsetLeft;
+    offsetY = clientY - parentElement.offsetTop;
+
+    document.addEventListener("mousemove", dragMove);
+    document.addEventListener("mouseup", endDrag);
+    document.addEventListener("touchmove", dragMove, { passive: false });
+    document.addEventListener("touchend", endDrag);
+  }
+
+  function dragMove(e) {
+    if (!isDragging) return;
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    parentElement.style.left = (clientX - offsetX) + "px";
+    parentElement.style.top = (clientY - offsetY) + "px";
+  }
+
+  function endDrag() {
+    isDragging = false;
+    parentElement.style.cursor = "grab";
+
+    document.removeEventListener("mousemove", dragMove);
+    document.removeEventListener("mouseup", endDrag);
+    document.removeEventListener("touchmove", dragMove);
+    document.removeEventListener("touchend", endDrag);
+  }
+
+  childElement.addEventListener("mousedown", startDrag);
+  childElement.addEventListener("touchstart", startDrag, { passive: false });
+}
+function getDuration(dateStr) {
+  let [day, month, year] = dateStr.split("/").map(Number);
+  let inputDate = new Date(year, month - 1, day);
+  let today = new Date();
+
+  let years = today.getFullYear() - inputDate.getFullYear();
+  let months = today.getMonth() - inputDate.getMonth();
+  let days = today.getDate() - inputDate.getDate();
+  if (days < 0) {
+    months--;
+    let prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    days += prevMonth.getDate();
+  }
+
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  return `${years}yrs, ${months}months, ${days}days`;
+}
+
+const ADVERT_AUTHOR_DETAILS = [
+                              '06/01/2019',
+                              'Agbesi Innocent Kwesi',
+                              'GHC1,254,412',
+                              '3-Bedroom House for Sale at East Legon',
+                              '555972390',
+                              `Beautiful 3-bedroom house located in a serene environment.Comes with 2 bathrooms,
+                              spacious living room, fitted kitchen, and a big compound. New change`,
+                              'ASHSJDJasdjfk44a5d5e852ss14dAAHAS8',
+                              `http://localhost/LandingPageRecs/user_photos/IMG20250628112400.jpg`
+                              ];
+const property_images = eid('property_images'),
+      DB_IMAGES = [
+                  "http://localhost/LandingPageRecs/user_photos/IMG20250628112234.jpg",
+                  "http://localhost/LandingPageRecs/user_photos/IMG20250628112400.jpg",
+                  "http://localhost/LandingPageRecs/user_photos/IMG20250628123243.jpg",
+                  "http://localhost/LandingPageRecs/user_photos/IMG20250628114159.jpg"
+                  ];
+var properties_innerHTML_images = '';
+DB_IMAGES.forEach(pim=>{
+let image_name_hunt = pim.split('/');
+image_name_hunt = image_name_hunt[image_name_hunt.length-1].split('.')[0].trim();
+properties_innerHTML_images+=`<img src="${pim}" alt="${image_name_hunt}">\n`;
+})
+property_images.innerHTML = properties_innerHTML_images.trim();
+let reg_date = ADVERT_AUTHOR_DETAILS[0],
+   duration = getDuration(reg_date);
+
+let full_reg_date = `${reg_date}(${duration})`;
+
+/* --- state / helpers --- */
+const loggedInUser = { name: "John Doe", avatar: "https://randomuser.me/api/portraits/men/75.jpg", USER_UNIQUE_ID:uniqueIdSync("John Doe").toLowerCase()};
+const sellerName = eid('sellerName'),
+      Telephone = eid('Telephone'),
+      user_registration_date = eid('user_registration_date'),
+      property_price_id = eid('property_price_id'),
+      AdvertTitle = eid('AdvertTitle'),
+      AdvertDescription = eid('AdvertDescription'),
+      Seller_avatar = eid('Seller_avatar');
+let Ad_Author_Account_Link = 'http://localhost/LandingPageRecs/MASCOM.html';
+sellerName.innerHTML = `<a href="${Ad_Author_Account_Link}">${ADVERT_AUTHOR_DETAILS[1]}</a>`;
+var ADVERT_UNIQUE_ID = ADVERT_AUTHOR_DETAILS[6];
+Seller_avatar.src = ADVERT_AUTHOR_DETAILS[7]
+Telephone.rhef = `tel: +233${ADVERT_AUTHOR_DETAILS[4]}`;
+Telephone.innerHTML = `📞 (+233)${ADVERT_AUTHOR_DETAILS[4]}`;
+user_registration_date.innerHTML = full_reg_date;
+property_price_id.innerHTML = ADVERT_AUTHOR_DETAILS[2];
+AdvertTitle.textContent = ADVERT_AUTHOR_DETAILS[3];
+let AdvertTitle2 = eid('AdvertTitle');
+AdvertTitle2.name = ADVERT_UNIQUE_ID;
+AdvertDescription.innerHTML = ADVERT_AUTHOR_DETAILS[5];
+const property_meta_db_array = ['Sept 24, 2025','Building & Construction','East Legon, Accra','150','254'];
+const property_meta_html = 
+      ["<div>📅 Posted: Dynamic_Placeholder</div>",
+      `<div>🏷️ Category: <a href="${Referred_by}">Dynamic_Placeholder</a></div>`,
+      "<div>📍 Location: Dynamic_Placeholder</div>",
+      '<div>👁️ Views: <span id="viewsCount">Dynamic_Placeholder</span></div>',
+      '<div>👍 Likes: <span id="likesCount">Dynamic_Placeholder</span></div>'];
+const viewsCount = eid('viewsCount'),
+      likesCount = eid('likesCount');
+let property_meta_innerHTML = '';
+const property_meta = document.querySelector('.property-meta');
+const property_meta_childeren = Array.from(property_meta.children);
+property_meta_childeren.forEach((pm, pm_num)=>{
+let property_meta_db_array_ele = property_meta_db_array[pm_num],
+    property_meta_html_ele = property_meta_html[pm_num].replace('Dynamic_Placeholder',
+    property_meta_db_array_ele);
+property_meta_innerHTML+=`${property_meta_html_ele}\n`;
+})
+property_meta.innerHTML = property_meta_innerHTML;
+const reviewsList = eid('reviewsList');
+const submitReviewBtn = eid('submitReview');
+const reviewText = eid('reviewText');
+
+const starEls = Array.from(document.querySelectorAll('#starRating .star'));
+let starStates = Array(starEls.length).fill(false);
+starEls.forEach((el, idx) => {
+  el.addEventListener('click', () => {
+    starStates[idx] = !starStates[idx];
+    el.classList.toggle('active', starStates[idx]);
+  });
+});
+function currentStarsCount(){ return starStates.filter(Boolean).length; }
+
+function el(tag, props = {}, children = []) {
+  const d = document.createElement(tag);
+  Object.entries(props).forEach(([k, v]) => {
+    if(k == 'id') d.id = v;
+    if (k === 'class') d.className = v;
+    else if (k === 'text') d.textContent = v;
+    else d.setAttribute(k, v);
+  });
+  (Array.isArray(children) ? children : [children]).forEach(ch => {
+    if (ch == null) return;
+    if (typeof ch === 'string' || typeof ch === 'number') d.appendChild(document.createTextNode(String(ch)));
+    else d.appendChild(ch);
+  });
+  return d;
+}
+function repliesHoverDisplay(event){
+let event_target = event.target,
+    p_element = event_target.parentElement,
+    event_target_parent_cName = p_element.className.trim().toLowerCase();
+if(p_element.contains(event_target) && event_target_parent_cName =="review_list_item"){
+p_element.style.background ="lightcyan";
+p_element.style.transition ="0.5s ease";
+}
+};
+function repliesMoutDisplay(event){
+let event_target = event.target,
+    p_element = event_target.parentElement,
+    event_target_parent_cName = p_element.className.trim().toLowerCase();
+if(p_element.contains(event_target) && event_target_parent_cName =="review_list_item"){
+p_element.style.background ="white";
+p_element.style.transition ="0.5s ease";
+}
+}
+/* --- create review/reply DOM --- */
+const pointerMachine = (ele_2arror,ele_selector,border_thickness=1)=>{
+  let prev_element_height = Math.round((ele_2arror.scrollHeight)/2),
+      prev_element_x_offset = ele_2arror.offsetLeft,
+      cssRules = `
+      ${ele_selector}::before {
+      content: "";
+      border-top: ${border_thickness}px solid limegreen;
+      position: absolute;
+      top: ${prev_element_height-border_thickness}px;
+      left: -${prev_element_x_offset+border_thickness}px;
+      width: ${prev_element_x_offset}px;
+    }`;
+// append only one <style> block
+const style = document.createElement("style");
+style.textContent = cssRules;
+requestAnimationFrame(() => {
+document.head.appendChild(style);
+ele_2arror.addEventListener("mouseover", repliesHoverDisplay);
+ele_2arror.addEventListener("mouseout", repliesMoutDisplay);
+});
+};
+var thread_width = 0;
+function createReviewElement(MEGA_REVIEW_DIC,uniqueness = 0) {
+  let author = MEGA_REVIEW_DIC.author,
+      avatar = MEGA_REVIEW_DIC.avatar,
+      text = MEGA_REVIEW_DIC.ReplyMessage,
+      review_class_name = MEGA_REVIEW_DIC.author_id,
+      stars = MEGA_REVIEW_DIC.AuthorStarRateNum,
+      depth = MEGA_REVIEW_DIC.depth_key;
+  let review_date = new Date().toLocaleString(),
+      ReviewAuthorName = author,
+      ReviewAuthorProfilePic = avatar,
+      ReviewAuthorReviewTexts = text,
+      ReviewAuthorStarRatingCount = stars;
+  const item = el('div', { class: `${review_class_name}`});
+  item.dataset.depth = depth;
+  item.style.marginLeft = `${depth*thread_width}px`;//Math.min(depth * 18, 120) + 'px';
+
+  const header = el('div', { class: `${review_class_name}` }, [
+    el('span',{class: `review-header${uniqueness}`}),
+    el('img', { class: 'review-avatar', id:`review_avatar${uniqueness}`, src: avatar || '', alt: author }),
+    el('span', { class: 'review-author', text: author }),
+    el('span', { class: 'review-meta', text: review_date + (stars ? ` • ${stars}★` : '') })
+  ]);
+  item.appendChild(header);
+  const content = el('div', { class: 'review-text', text: text });
+  item.appendChild(content);
+
+  const actions = el('div', { class: 'review-actions' });
+
+  // Like (toggle)
+  const likeBtn = el('button', { class: 'small-btn', text: '👍 ' });
+  const likeCount = el('span', { class: 'like-count', text: '0' });
+  likeBtn.appendChild(likeCount);
+  likeBtn.dataset.liked = 'false';
+  likeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const liked = likeBtn.dataset.liked === 'true';
+    likeBtn.dataset.liked = liked ? 'false' : 'true';
+    likeCount.textContent = String(Math.max(0, parseInt(likeCount.textContent || '0')) + (liked ? -1 : 1));
+    likeBtn.style.opacity = liked ? '1' : '0.8';
+    let likedReviewAuthor = likeBtn.parentElement.parentElement.querySelector('img').alt;
+    const review_liked_recs = {
+                              'likedReviewAuthor':likedReviewAuthor,
+                              'loggedInUser':loggedInUser,
+                              'liked_date':review_date
+                               };
+  });
+
+  // Reply
+  const replyBtn = el('button', { class: 'small-btn', text: '↩ Reply' });
+  replyBtn.addEventListener('click', (e) => { e.stopPropagation(); openReplyBox(item,review_class_name); });
+
+  // Report
+  const reportBtn = el('button', { class: 'small-btn', text: '⚠ Report' });
+  reportBtn.addEventListener('click', (e) => { e.stopPropagation(); openReportModal(item); });
+
+  // Delete review/reply
+  const deleteBtn = el('button', { class: 'small-btn', text: '🗑 Delete',id:'deleteBtn'});
+  deleteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // if replyBox is inside this item, move it back and hide before removing
+    const replyBox = eid('replyBox');
+    if (item.contains(replyBox)) {
+      document.body.appendChild(replyBox);
+      replyBox.style.display = 'none';
+      eid('replyText').value = '';
+      currentReplyTarget = null;
+    }
+    item.remove();
+    let delete_date = new Date().toLocaleString();
+    const DeleteReplyActionsMeta = {
+                                    'loggedInUser':loggedInUser,
+                                    'delete_date':delete_date,
+                                    'ADVERT_UNIQUE_ID':ADVERT_UNIQUE_ID
+                                   };
+  const reviewItemsRemain = reviewsList.querySelectorAll('.review_list_item');
+  Array.from(reviewItemsRemain).forEach(rev_items=>{
+    let rev_item_id = rev_items.id;
+    pointerMachine(rev_items,`#${rev_item_id}`);
+  })
+  });
+  var action_buttons = [likeBtn, replyBtn, reportBtn, deleteBtn];
+  if(review_class_name.toLowerCase() != loggedInUser.USER_UNIQUE_ID){
+    action_buttons = [likeBtn, replyBtn, reportBtn];
+  }
+  actions.append(...action_buttons);
+  item.appendChild(actions);
+  // replies container (holds nested replies)
+  item.appendChild(el('div', { class: `${review_class_name}-replies` }));
+  return item;
+}
+
+/* --- submit top-level review --- */
+submitReviewBtn.addEventListener('click', () => {
+  const txt = reviewText.value.trim();
+  if (!txt) return alert('Write something first!');
+  const starsCount = currentStarsCount();
+  const reviewEl = createReviewElement({ author: loggedInUser.name, avatar: loggedInUser.avatar, ReplyMessage:txt, AuthorStarRateNum:starsCount, depth_key:0,author_id:uniqueIdSync(loggedInUser.name)});
+  reviewsList.prepend(reviewEl);
+  reviewEl.className = "review_list_item";
+  reviewText.value = '';
+  starStates = starStates.map(() => false);
+let time_date = new Date().toLocaleString();
+  starEls.forEach(s => s.classList.remove('active'));
+/*PROPERTY LISTING DATA COLLECTION ARENA: START*/
+const UserLikesAndSavedAdsDic = {
+                                 'sellerLikedExported':sellerLikedExported,
+                                 'sellerFavExported':sellerFavExported
+                                };
+const New_Review_meta = { 
+                         'review_date':time_date,
+                         'ReviewAuthorName':loggedInUser.author,
+                         'ReviewAuthorProfilePic':loggedInUser.avatar,
+                         'ReviewAuthorReviewTexts':txt,
+                         'ReviewAuthorStarRatingCount':starsCount
+                        };
+const PROPERTY_LISTING_DATA_HUB = { 
+                                   'UserLikesAndSavedAdsDic':UserLikesAndSavedAdsDic,
+                                   'New_Review_meta':New_Review_meta
+                                  };
+/*PROPERTY LISTING DATA COLLECTION ARENA: END*/
+});
+
+/* --- single movable reply box --- */
+const replyBox = eid('replyBox');
+const replyTextarea = eid('replyText');
+const submitReplyBtn = eid('submitReply');
+const cancelReplyBtn = eid('cancelReply');
+let currentReplyTarget = null;
+
+function openReplyBox(reviewItem,replies_arg = 'replies') {
+  const replies = reviewItem.querySelector(`.${replies_arg}-replies`);
+  let pElement = replies.parentElement.id;
+  if (!replies) return;
+  replies.appendChild(replyBox);
+  replyBox.style.display = 'block';
+  replyBox.setAttribute('aria-hidden', 'false');
+  replyTextarea.focus();
+  currentReplyTarget = replies;
+}
+
+cancelReplyBtn.addEventListener('click', () => {
+  replyBox.style.display = 'none';
+  replyBox.setAttribute('aria-hidden', 'false');
+  replyTextarea.value = '';
+  currentReplyTarget = null;
+});
+var new_reply_count = 0;
+submitReplyBtn.addEventListener('click', () => {
+  new_reply_count+=1;
+  const txt = replyTextarea.value.trim();
+  const starsCount = currentStarsCount();
+  if (!txt || !currentReplyTarget) {
+    if (!txt) alert('Please write a reply before submitting.');
+    return;
+  }
+  const parentReviewItem = currentReplyTarget.closest('.review_list_item');
+  const parentDepth = parentReviewItem ? (parseInt(parentReviewItem.dataset.depth || '0') || 0) : 0;
+  const depth = parentDepth + 1;
+  let review_date = new Date().toLocaleString();
+  const ReviewReplyActivitiesDic = {
+                                'review_date':review_date,
+                                'ReviewAuthor':loggedInUser.name,
+                                'ReviewAuthorProPic':loggedInUser.avatar,
+                                'ReviewText':txt,
+                                'ReviewRecipient':currentReplyTarget.parentElement.querySelector("img").alt
+                                };
+  const replyEl = createReviewElement({ author: loggedInUser.name, avatar: loggedInUser.avatar, ReplyMessage:txt, AuthorStarRateNum:starsCount, depth_key:0,author_id:uniqueIdSync(loggedInUser.name)});
+  let new_reply_id = `new_reply_no${new_reply_count}`;
+  replyEl.id = new_reply_id;
+  currentReplyTarget.appendChild(replyEl);
+  pointerMachine(replyEl,`#${new_reply_id}`);
+  replyEl.className = "review_list_item";
+  // cleanup
+  replyTextarea.value = '';
+  replyBox.style.display = 'none';
+  currentReplyTarget = null;
+  // move replyBox back to body to keep DOM tidy
+  document.body.appendChild(replyBox);
+});
+
+/* --- Report modal logic (works for reviews and seller) --- */
+const reportModal = eid('reportModal'); // backdrop
+const reportForm = eid('reportForm');
+let reportTarget = null;
+
+function openReportModal(targetItem) {
+  reportTarget = targetItem;
+  reportForm.reset();
+  reportModal.style.display = 'flex';
+  reportModal.setAttribute('aria-hidden', 'false');
+  // focus first input for accessibility: try to focus first radio (if supported)
+  const firstInput = reportForm.querySelector('input[type="radio"]');
+  if (firstInput) firstInput.focus();
+}
+
+function closeReportModal() {
+  reportModal.style.display = 'none';
+  reportModal.setAttribute('aria-hidden', 'false');
+  reportTarget = null;
+}
+
+// report seller button
+eid('reportSellerBtn').addEventListener('click', () => {
+  const sellerContainer = eid('sellerContainer');
+  openReportModal(sellerContainer);
+});
+
+// clicking backdrop closes modal
+reportModal.addEventListener('click', (e) => {
+  if (e.target === reportModal) closeReportModal();
+});
+// ESC closes
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeReportModal(); });
+eid('cancelReport').addEventListener('click', () => closeReportModal());
+const submitReportBtn = eid('submitReportBtn');
+submitReportBtn.addEventListener('click', (e) => {
+  if (!reportTarget) { closeReportModal(); return; }
+  const reviewItem = reportTarget.closest ? reportTarget.closest('.review_list_item') : null;
+  if (reviewItem) {
+      let badge = el('span', { class: 'badge-reported', text: 'Reported' });
+      const ReportedAuthor = reviewItem.querySelector('img').alt.trim();
+      const radio_buttons = reportForm.querySelectorAll('input'),
+            textArea = reportForm.querySelector('textarea');
+      // Add a small remove button inside the badge
+      const removeBtn = el('button', { class: 'small-btn', text: '✖' });
+      removeBtn.title = 'Remove report';
+      removeBtn.addEventListener('click', (ev) => { ev.stopPropagation(); badge.remove(); });
+      badge.appendChild(removeBtn);
+      let review_header_span = reviewItem.querySelector('[class*="review-header"]'),
+          review_header_img = reviewItem.querySelector('[id*="review_avatar"]'),
+          header = reviewItem.querySelector('.review-meta'),
+          badge_reported = null;
+      if(review_header_span){
+        header = review_header_span;
+        badge_reported = review_header_span.querySelector('.badge-reported');
+        if(badge_reported==null){
+        if (header){
+          if(review_header_img!=null && review_header_span!=null){
+            let review_header_img_width = review_header_img.scrollWidth,
+                review_header_img_x_offset = review_header_img.offsetLeft,
+                reportBadgeXoffset = review_header_img_x_offset + review_header_img_width + 10;
+            review_header_span.style.left = `${reportBadgeXoffset}px`;
+          }
+          header.appendChild(badge);
+          let Report_Text_Message = textArea.value,
+              Report_Category = '',
+              report_date = new Date().toLocaleString();
+          Array.from(radio_buttons).forEach(ch=>{
+          let ch_v = ch.value,
+              ch_v_len = ch_v.length;
+          if(ch_v_len>0) Report_Category = ch_v;
+          })
+          const ReportDic = { 
+                              'loggedInUser':loggedInUser,
+                              'report_date':report_date,
+                              'ReportedAuthor':ReportedAuthor,
+                              'Report_Category':Report_Category,
+                              'Report_Text_Message':Report_Text_Message
+                            }
+        }
+        }
+      }
+  } else {
+    // Seller case: attach badge to sellerName (strong)
+    const sellerNameEl = eid('sellerName');
+    if (sellerNameEl) {
+      let badge = sellerNameEl.querySelector('.badge-reported');
+      if (!badge) {
+        badge = el('span', { class: 'badge-reported', text: 'Reported' });
+        const removeBtn = el('button', { class: 'small-btn', text: '✖' });
+        removeBtn.title = 'Remove report';
+        removeBtn.addEventListener('click', (ev) => { ev.stopPropagation(); badge.remove(); });
+        badge.appendChild(removeBtn);
+        sellerNameEl.appendChild(badge);
+      }
+    }
+  }
+
+  closeReportModal();
+});
+
+/* --- Seller like/fav toggle (keeps previous UI) --- */
+const sellerLikeBtn = eid('sellerLikeBtn');
+const sellerLikeCounter = eid('sellerLikeCounter');
+const sellerFavBtn = eid('sellerFavBtn');
+let sellerLiked = false, sellerFav = false;
+let seller_like_clicked = false;
+var sellerLikedExported = '0',
+    sellerFavExported = '';
+sellerLikeBtn.addEventListener('click', () => {
+  sellerLiked = !sellerLiked;
+  sellerLikeCounter.textContent = sellerLiked ? '1' : '0';
+  const likesCount2 = eid('likesCount');
+  let sellerLikeCounter_int = Number(sellerLikeCounter.textContent.trim()),
+      sellerLikeCounter_int_dyn = sellerLikeCounter_int;
+  if(sellerLikeCounter_int_dyn==0 && seller_like_clicked){
+    sellerLikeCounter_int_dyn = -1;
+  }
+  let likesCount_int = Number(likesCount2.textContent.trim())+sellerLikeCounter_int_dyn;
+  likesCount2.textContent = `${likesCount_int}`;
+  sellerLikeBtn.style.color = sellerLiked ? 'limegreen' : '#000';
+  sellerLikedExported = sellerLikeCounter.textContent.trim();
+  seller_like_clicked = true;
+});
+
+sellerFavBtn.addEventListener('click', () => {
+  sellerFav = !sellerFav;
+  sellerFavBtn.textContent = sellerFav ? '✅ Favourited' : '⭐ Add to Favourite';
+  sellerFavBtn.style.background = sellerFav ? 'limegreen' : '#efefef';
+  sellerFavExported = sellerFavBtn.textContent.trim();
+});
+
+/* --- demo seed --- */
+function uniqueIdSync(fullName, phone, email, password) {
+  const raw = `${fullName}|${phone}|${email}|${password}`;
+  let hash = 0;
+  for (let i = 0; i < raw.length; i++) {
+    const chr = raw.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash |= 0; // force into 32-bit int
+  }
+  return "USR_" + Math.abs(hash).toString(36);
+}
+const dd = {
+ADVERT_UNIQUE_ID_REVIEW_1: 'dhdjfhash',
+author: "Agbesi Innocent Kwesi",
+author_id: uniqueIdSync("Agbesi Innocent Kwesi"),
+replyBadge: uniqueIdSync("Agbesi Innocent Kwesi"),
+avatar: "https://randomuser.me/api/portraits/men/50.jpg",
+ReplyMessage: "Seller here",
+Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+ReviewTotalLikes: 0,
+AuthorStarRateNum: 4
+}
+const default_review = createReviewElement(dd);
+default_review.className = "review_list_item";
+//default_review.style.display = 'block';
+reviewsList.appendChild(default_review);
+var running_review_here = default_review;
+const REVIEWS_REC_LIST = [
+  {
+    ADVERT_UNIQUE_ID_REVIEW_1: 'dhdjfhash',
+    author: "Ama Serwaa",
+    author_id: uniqueIdSync("Ama Serwaa"),
+    replyBadge: uniqueIdSync("Agbesi Innocent Kwesi"),
+    avatar: "https://randomuser.me/api/portraits/women/50.jpg",
+    ReplyMessage: "Nice location, visited last week and liked it.",
+    Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+    ReviewTotalLikes: 0,
+    AuthorStarRateNum: 4,
+
+    // direct replies to this main review
+    RW1_DirectReplyNO1: [
+      {
+        author: "Kwame Boateng",
+        author_id: uniqueIdSync("Kwame Boateng"),
+        replyBadge: uniqueIdSync("Ama Serwaa"),
+        avatar: "https://randomuser.me/api/portraits/men/40.jpg",
+        ReplyMessage: "Totally agree with you!",
+        Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+        ReplyTotalLikes: 2,
+
+        // sub replies
+        RW1_DirectReplyNO1_Sr1: [
+          {
+            author: "Akosua Mensah",
+            author_id: uniqueIdSync("Akosua Mensah"),
+            replyBadge: uniqueIdSync("Kwame Boateng"),
+            avatar: "https://randomuser.me/api/portraits/women/65.jpg",
+            ReplyMessage: "Exactly, the neighborhood is lovely.",
+            Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+            ReplyTotalLikes: 1,
+          }
+        ],
+
+        // sub replies
+        RW1_DirectReplyNO1_Sr2: [
+          {
+            author: "Pious Okuon",
+            author_id: uniqueIdSync("Pious Okuon"),
+            replyBadge: uniqueIdSync("Kwame Boateng"),
+            avatar: "https://randomuser.me/api/portraits/women/69.jpg",
+            ReplyMessage: "Me too. This guy truly understands the business.",
+            Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+            ReplyTotalLikes: 41,
+          }
+        ]
+      }
+    ],
+    RW1_DirectReplyNO2: [
+      {
+        author: "Michael Akoto",
+        author_id: uniqueIdSync("Michael Akoto"),
+        replyBadge: uniqueIdSync("Ama Serwaa"),
+        avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+        ReplyMessage: "I called this seller to make enquiries and his response was massive!",
+        Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+        ReplyTotalLikes: 5,
+
+        // sub replies
+        RW1_DirectReplyNO2_Sr1: [
+          {
+            author: "Agyeman Godfred",
+            author_id: uniqueIdSync("Agyeman Godfred"),
+            replyBadge: uniqueIdSync("Michael Akoto"),
+            avatar: "https://randomuser.me/api/portraits/women/15.jpg",
+            ReplyMessage: "If that is your experience with him, then I am fully convinced to give his product a try!",
+            Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+            ReplyTotalLikes: 3,
+
+            // deeper
+            RW1_DirectReplyNO2_Sr2: [
+              {
+                author: "Winner Pascal",
+                author_id: uniqueIdSync("Winner Pascal"),
+                replyBadge: uniqueIdSync("Agyeman Godfred"),
+                avatar: "https://randomuser.me/api/portraits/women/11.jpg",
+                ReplyMessage: "Me too!",
+                Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+                ReplyTotalLikes: 3
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    ADVERT_UNIQUE_ID_REVIEW_2: 'foslkf5648',
+    author: 'Kofi Boateng',
+    author_id: uniqueIdSync("Kofi Boateng"),
+    replyBadge: uniqueIdSync("Agbesi Innocent Kwesi"),
+    avatar: 'https://randomuser.me/api/portraits/men/22.jpg', 
+    ReplyMessage: 'Is the price negotiable?',
+    Review_or_Reply_Time:'9/28/2025, 6:09:56 PM', 
+    ReviewTotalLikes: 0,
+    AuthorStarRateNum: 0, 
+
+    RW2_DirectReplyNO1: [
+      {
+        author: "Ampadu Agyeman Prempeh Chris",
+        author_id: uniqueIdSync("Ampadu Agyeman Prempeh Chris"),
+        replyBadge: uniqueIdSync("Kofi Boateng"),
+        avatar: "https://randomuser.me/api/portraits/women/85.jpg",
+        ReplyMessage: "I called him some time ago but I did not get any answers from him.",
+        Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+        ReplyTotalLikes: 0,
+
+        RW2_DirectReplyNO1_Sr1: [
+          {
+            author: "Joseph Hooks",
+            author_id: uniqueIdSync("Joseph Hooks"),
+            replyBadge: uniqueIdSync("Ampadu Agyeman Prempeh Chris"),
+            avatar: "https://randomuser.me/api/portraits/women/51.jpg",
+            ReplyMessage: "Yes, it is. I called him a few days earlier and he confirmed it",
+            Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+            ReplyTotalLikes: 2,
+            RW2_DirectReplyNO1_Sr1_1: [{
+              author: "Adele Bruce",
+              author_id: uniqueIdSync("Adele Bruce"),
+              replyBadge: uniqueIdSync("Joseph Hooks"),
+              avatar: "https://randomuser.me/api/portraits/women/25.jpg",
+              ReplyMessage: "Interesting one, this is getting wild! I will have to buy this house!",
+              Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+              ReplyTotalLikes: 0
+            }]
+          }
+        ],
+        RW2_DirectReplyNO1_Sr2: [
+          {
+            author: "Agya Koo Kofi",
+            author_id: uniqueIdSync("Agya Koo Kofi"),
+            replyBadge: uniqueIdSync("Ampadu Agyeman Prempeh Chris"),
+            avatar: "https://randomuser.me/api/portraits/women/38.jpg",
+            ReplyMessage: "Mr. Agyeman are you sure of what you are saying?",
+            Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+            ReplyTotalLikes: 50,
+            RW2_DirectReplyNO1_Sr2_1: [
+              {
+                author: "Deborah Esinam Mawuli",
+                author_id: uniqueIdSync("Deborah Esinam Mawuli"),
+                replyBadge: uniqueIdSync("Agya Koo Kofi"),
+                avatar: "https://randomuser.me/api/portraits/women/23.jpg",
+                ReplyMessage: "The house is beautiful mmom, I will share it with my husband for us to buy it",
+                Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+                ReplyTotalLikes: 78,
+
+                RW2_DirectReplyNO1_Sr2_1_1:[{
+                author: "Quaye Regina",
+                author_id: uniqueIdSync("Quaye Regina"),
+                replyBadge: uniqueIdSync("Deborah Esinam Mawuli"),
+                avatar: "https://randomuser.me/api/portraits/women/72.jpg",
+                ReplyMessage: "Well, that is an intresting one, maybe we should all find a husband",
+                Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+                ReplyTotalLikes: 250
+              }
+
+                ],
+              RW2_DirectReplyNO1_Sr2_2:[
+                {
+
+                author: "Roman Lag",
+                author_id: uniqueIdSync("Roman Lag"),
+                replyBadge: uniqueIdSync("Agya Koo Kofi"),
+                avatar: "https://randomuser.me/api/portraits/women/20.jpg",
+                ReplyMessage: "Agya Koo Kofi, are you sure of what you are saying? The ladies have started taking relationship goals from this o",
+                Review_or_Reply_Time:'9/28/2025, 6:09:56 PM',
+                LastReviewOrReply:'true',
+                ReplyTotalLikes: 2,
+                creater_replies:[
+                  {
+                  author: "John Doe",
+                  author_id: uniqueIdSync("John Doe"),
+                  replyBadge: uniqueIdSync("Roman Lag"),
+                  avatar: "https://randomuser.me/api/portraits/men/20.jpg",
+                  ReplyMessage: "Thanks Roman for the reviews, yes, he is very right.",
+                  Review_or_Reply_Time:'9/28/2025, 10:09:56 PM',
+                  LastReviewOrReply:'true',
+                  ReplyTotalLikes: 16,
+                  }
+                ]
+                }
+              ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+];
+
+
+var review_met_countdown = 0,
+    prev_element = null;
+const  reviewsRepliesMachinery = (runningUserInfoDic,running_review_const)=> {
+let replyBadge_local = runningUserInfoDic.replyBadge;
+review_met_countdown+=1;
+running_review_const.className = "review_list_item";
+let running_review_replies = reviewsList.querySelector(`.${replyBadge_local}-replies`);
+let reply = createReviewElement(runningUserInfoDic,review_met_countdown);
+reply.className = "review_list_item";
+reply.id = `review_list_item${review_met_countdown}`;
+running_review_replies.appendChild(reply);
+}
+
+var user_meta = '',
+    user_meta_start = false;
+const reviewDicRecur = (rd) => {
+  Object.entries(rd).forEach(([key, value]) => {
+    if (typeof value === "object" && value !== null) {
+      reviewDicRecur(value);
+    }
+    let key_lower = key.toLowerCase();
+    if(key_lower=="author"){
+     user_meta_start = true;
+    }
+    if(user_meta_start){
+     user_meta+=`"${key}":"${value}",\n`;
+    }
+    if(key_lower == "ReplyTotalLikes".toLowerCase() || key_lower == 'AuthorStarRateNum'.toLowerCase()){
+    user_meta = `{${user_meta.slice(0, user_meta.trim().length-1)}}`;
+    let user_meta_dic = JSON.parse(user_meta);
+    user_meta_dic['depth_key'] = 0;
+    reviewsRepliesMachinery(user_meta_dic,running_review_here);
+    running_review_here = createReviewElement(user_meta_dic);
+    user_meta_start=false;
+    user_meta='';
+    }
+  });
+};
+
+REVIEWS_REC_LIST.forEach((reviews_dic,reviews_dic_no)=>{
+reviewDicRecur(reviews_dic);
+})
+for (let i = 1; i <= review_met_countdown; i++) {
+  let formed_id = `review_list_item${i}`,
+      ele_2_deco = eid(formed_id);
+pointerMachine(ele_2_deco,`#${formed_id}`);
+}
+/*MESSAGING: START*/
+const MessagesScreen = eid('MessagesScreen'),
+      MessageChatBox = eid('MessageChatBox'),
+      MessagesIcon = eid('chatBtn'),
+      chatInput = eid('chatInput'),
+      ChatImageShare = eid('ChatImageShare'),
+      ShareImage = eid('ShareImage');
+makeDraggable(eid('Your_messages_header'));
+const MessagesScreenDynamicSizingPos = ()=>{
+let window_width = window.innerWidth,
+    MessagesScreen_w = window_width*0.75,
+    MessagesScreen_x_off = Math.round((window_width-MessagesScreen_w)/2);
+MessagesScreen.style.width = `${MessagesScreen_w}px`;
+MessagesScreen.style.left = `${MessagesScreen_x_off}px`;
+const messageBoxTwins = eid('messageBoxTwins');
+let messageBoxTwins_width = messageBoxTwins.clientWidth-20;
+const pikins = Array.from(MessagesScreen.children),
+      twins_boxes = Array.from(pikins[1].children),
+      firstElementChild_ = twins_boxes[0],
+      lastElementChild_ = twins_boxes[2];
+let firstElementChild_cw = Math.round(messageBoxTwins_width*0.30),
+    lastElementChild_cw = Math.round(messageBoxTwins_width*0.60);
+firstElementChild_.style.width = `${firstElementChild_cw}px`;
+lastElementChild_.style.width = `${lastElementChild_cw}px`;
+}
+MessagesScreenDynamicSizingPos();
+window.addEventListener('resize',()=>{
+MessagesScreenDynamicSizingPos();
+})
+const displayer = (screen_ele_arg) => {
+  let HeaderScreenDy = 20;//Header.scrollHeight;
+  screen_ele_arg.style.display = 'flex';
+  screen_ele_arg.style.position = 'absolute';
+  screen_ele_arg.style.top = `0`;
+  screen_ele_arg.style.transition = 'top 0.3s linear';
+
+  // wait until next frame to apply new position
+  requestAnimationFrame(() => {
+    screen_ele_arg.style.top = `${HeaderScreenDy}px`;
+  });
+};
+
+ChatImageShare.addEventListener('click', (e)=>{
+ShareImage.click();
+})
+var fake_src = '',
+    image_name = '';
+const img_name = (img_src)=>{
+let slashe = '';
+slashe = img_src.includes('\\')?'\\':'/';
+let fake_src_split = img_src.split(slashe),
+    fake_src_split_len = fake_src_split.length;
+return fake_src_split[fake_src_split_len-1];
+}
+var image_shared = [];
+ShareImage.addEventListener('change',()=>{
+image_shared = ShareImage.files;
+const url = URL.createObjectURL(image_shared[0])
+fake_src = url;
+image_name = img_name(ShareImage.value);
+chatInput.value = image_name;
+})
+MessagesIcon.addEventListener('click', () => {
+  displayer(MessagesScreen);
+});
+
+const notiMsgScreenGuy = (div_element, screen_ele) => {
+  div_element.addEventListener('mouseover', () => {
+    displayer(screen_ele);
+  });
+};
+
+// pass the variable name as string
+notiMsgScreenGuy(MessagesIcon, MessagesScreen);
+const closeChatMsg = eid('closeChatMsg'),
+    sendMessage = eid("sendMessage"),
+    chatBody = document.querySelector(".chat-body");
+// Close button
+closeChatMsg.addEventListener("click", () => {
+MessagesScreen.style.display = "none";
+});
+
+// Send message
+sendMessage.addEventListener("click", (e) => {
+var wrong_image_name = false,
+    clean_records = true;
+let text = chatInput.value.trim();
+const msg = document.createElement("div");
+msg.style.cssText = `
+overflow-wrap: break-word;
+max-width:20vw;
+background: rgba(212, 175, 55, 1);
+box-shadow: 0 4px 12px rgba(34, 139, 34, 0.35); /* forest limegreen tint */
+color:#000;
+font-weight:600;
+`;
+if (!text) return;
+if(fake_src.trim().length>0){
+if(text==image_name){
+var MessageChatBox_x = Math.round(0.4*MessageChatBox.scrollWidth),
+    MessageChatBox_y = Math.round(0.4*MessageChatBox.scrollHeight);
+text = `<img src="${fake_src}" alt="${image_name}" style="width:${MessageChatBox_x}px;height:${MessageChatBox_y}px;border-radius:10px;">`;
+msg.innerHTML = text;
+msg.style.background = "transparent";
+fake_src='';
+}else{
+alert("can't send this image, check image name");
+wrong_image_name = true;
+clean_records = false;
+}
+}else{
+if(text.includes('http:') || text.includes('https:')){
+msg.innerHTML = `<a href="${text}">${text}</a>`;
+msg.style.background = "transparent";
+}else{
+if(!wrong_image_name){
+msg.innerHTML = `<span>${text}</span>`;
+}
+}
+}
+if(clean_records){
+msg.className = "message-sent";
+chatBody.appendChild(msg);
+chatInput.value = "";
+chatBody.scrollTop = chatBody.scrollHeight;
+
+let msg_date = new Date().toLocaleString();
+const chat_dic = { 
+                  'ImageSharedData':{
+                    'image_shared':image_shared,
+                    'image_name':image_name
+                  },
+                  'loggedInUser':loggedInUser,
+                  'msg_text':text,
+                  'msg_date':msg_date
+                  };
+}
+});
+
+// Enter key to send
+chatInput.addEventListener("keydown", (e) => {
+if (e.key === "Enter") {
+  sendMessage.click();
+}
+});
+/*MESSAGING: END*/
+</script>
+</body>
+</html>
